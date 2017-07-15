@@ -69,6 +69,7 @@ func GetHandler(client *redis.Client) http.HandlerFunc {
             i++
         }
 
+	// I know, I know - check the error. This method is deprecated anyway.
         // Make all lookups at once
         mv, _ := client.MGet(keys...).Result()
         // Just dump it as a Go array
