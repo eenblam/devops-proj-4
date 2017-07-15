@@ -24,40 +24,31 @@ func RootHandler(client *redis.Client) http.HandlerFunc {
 
 func GetJSONHandler(client *redis.Client) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
-        fmt.Println(r.URL.Path)
+        w.Header().Set("Content-Type", "application/json")
 
         query, e := url.ParseQuery(r.URL.RawQuery)
         if e != nil {
             fmt.Println("Bad query")
         }
 
-        fmt.Println(r.URL.RawQuery)
-
         // Get keys as map
-        m := make(map[string]string)
+        m := make(map[string]interface{})
         for key, _ := range query {
             value, e := client.Get(key).Result()
             if e != nil {
-                fmt.Println("I don't have", key)
+                fmt.Println("query for missing key:", key)
             }
 
             m[key] = value
         }
 
         // Serialize map to JSON
-        jsonResult, jsonErr := json.Marshal(m)
-        if jsonErr != nil {
-            fmt.Println("Could not convert values to JSON")
-        }
-
-        fmt.Fprintln(w, jsonResult)
+        json.NewEncoder(w).Encode(m)
     }
 }
 
 func GetHandler(client *redis.Client) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
-        fmt.Println(r.URL.Path)
-
         query, e := url.ParseQuery(r.URL.RawQuery)
         if e != nil {
             fmt.Println("Bad query")
@@ -75,21 +66,17 @@ func GetHandler(client *redis.Client) http.HandlerFunc {
 
         // Make all lookups at once
         mv, _ := client.MGet(keys...).Result()
+        // Just dump it as a Go array
         fmt.Fprintln(w, mv)
     }
 }
 
 func SetHandler(client *redis.Client) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
-        // asdf
-        fmt.Println(r.URL.Path)
-
         query, e := url.ParseQuery(r.URL.RawQuery)
         if e != nil {
-            fmt.Println("Bad query")
+            fmt.Println("Could not parse query:", r.URL.RawQuery)
         }
-
-        fmt.Println(r.URL.RawQuery)
 
 	for key, values := range query {
             // Only accept the first value, I guess
