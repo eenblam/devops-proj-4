@@ -25,10 +25,10 @@ make test && sudo make install
 
 echo Configuring Redis
 sudo mkdir /etc/redis
-sudo cp /Vagrant/redis.conf /etc/redis/
+sudo cp /vagrant/redis.conf /etc/redis/
 
 echo Configuring systemd for Redis
-sudo mv /Vagrant/redis.service /etc/systemd/system/redis.service
+sudo mv /vagrant/redis.service /etc/systemd/system/redis.service
 sudo systemctl enable redis
 
 echo Configuring Redis user
