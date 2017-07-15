@@ -4,6 +4,7 @@ import (
     "fmt"
     //"log"
 
+    "encoding/json"
     //"html/template"
     "net/http"
     "net/url"
@@ -21,6 +22,38 @@ func RootHandler(client *redis.Client) http.HandlerFunc {
     }
 }
 
+func GetJSONHandler(client *redis.Client) http.HandlerFunc {
+    return func (w http.ResponseWriter, r *http.Request) {
+        fmt.Println(r.URL.Path)
+
+        query, e := url.ParseQuery(r.URL.RawQuery)
+        if e != nil {
+            fmt.Println("Bad query")
+        }
+
+        fmt.Println(r.URL.RawQuery)
+
+        // Get keys as map
+        m := make(map[string]string)
+        for key, _ := range query {
+            value, e := client.Get(key).Result()
+            if e != nil {
+                fmt.Println("I don't have", key)
+            }
+
+            m[key] = value
+        }
+
+        // Serialize map to JSON
+        jsonResult, jsonErr := json.Marshal(m)
+        if jsonErr != nil {
+            fmt.Println("Could not convert values to JSON")
+        }
+
+        fmt.Fprintln(w, jsonResult)
+    }
+}
+
 func GetHandler(client *redis.Client) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
         fmt.Println(r.URL.Path)
@@ -31,24 +64,16 @@ func GetHandler(client *redis.Client) http.HandlerFunc {
         }
 
         fmt.Println(r.URL.RawQuery)
-        /*
-	for key, _ := range query {
-            v, e := client.Get(key).Result()
-            if e != nil {
-                fmt.Println("I don't have", key)
-            }
 
-            //fmt.Println("Key:\t", k, "\tValue:\t", v)
-            fmt.Println(v)
-        }
-        */
-
+        // Get keys of map query as array
         keys := make([]string, len(query))
         i := 0
         for k := range query {
             keys[i] = k
             i++
         }
+
+        // Make all lookups at once
         mv, _ := client.MGet(keys...).Result()
         fmt.Fprintln(w, mv)
     }

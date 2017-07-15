@@ -28,6 +28,7 @@ func main() {
 
     http.HandleFunc("/", server.RootHandler(client))
     http.HandleFunc("/api/get", server.GetHandler(client))
+    http.HandleFunc("/api/getJSON", server.GetJSONHandler(client))
     http.HandleFunc("/api/set", server.SetHandler(client))
     log.Fatal(http.ListenAndServe(":5000", nil))
 }
