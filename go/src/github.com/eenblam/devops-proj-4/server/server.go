@@ -5,7 +5,7 @@ import (
     //"log"
 
     "encoding/json"
-    //"html/template"
+    "html/template"
     "net/http"
     "net/url"
 
@@ -15,10 +15,15 @@ import (
 func RootHandler(client *redis.Client) http.HandlerFunc {
     // Return home page
     return func (w http.ResponseWriter, r *http.Request) {
-        //data := nil
+        // This doesn't actually do anything at the moment, hence nil at bottom
+        t, err := template.ParseFiles("views/index.html")
+        if err != nil {
+            fmt.Println(err)
+            fmt.Fprintf(w, "Well, this is embarrassing...")
+            return
+        }
 
-        //t, err := template.ParseFiles("index.html")
-        //t.execute(w, data)
+        t.Execute(w, nil)
     }
 }
 
