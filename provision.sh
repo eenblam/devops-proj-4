@@ -1,8 +1,16 @@
-apt-get update
-
-#TODO Replace with NGINX?
-echo Installing apache httpd
-apt-get install -y apache2
+echo Installing NGINX
+sudo echo "deb http://nginx.org/packages/debian xenial nginx" >> /etc/apt/sources.list
+sudo echo "deb-src http://nginx.org/packages/debian xenial nginx" >> /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get install -y nginx
+sudo ufw allow 'Nginx Full'
+# https://stackoverflow.com/questions/5009324/node-js-nginx-what-now
+sudo mv /vagrant/testnginx /etc/nginx/sites-available/testnginx
+cd /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/testnginx testnginx
+#TODO init.d
+sudo systemctl enable nginx
+sudo systemctl nginx restart
 
 echo Installing Redis
 # See https://redis.io/topics/quickstart
@@ -37,6 +45,7 @@ sudo tar -C /usr/local -xzf go1.8.3.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 
 #TODO Export $GOPATH=wherever in the synced folder
+export GOPATH=/vagrant/go
 
 echo Installing dep
 export PATH=$PATH:$HOME/go/bin
@@ -44,4 +53,4 @@ go get -u github.com/golang/dep/cmd/dep
 
 echo Install golang dependencies
 cd /vagrant
-dep ensure
+go get -u github.com/go-redis/redis

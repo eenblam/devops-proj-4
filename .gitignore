@@ -1,2 +1,7 @@
 .vagrant/
 *.log
+go/bin
+go/pkg
+go/src/github.com/golang
+go/src/github.com/go-redis
+*.rdb
